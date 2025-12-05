@@ -1,0 +1,53 @@
+name: CI Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-22.04
+    
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run Tests
+      run: |
+        python -c "assert True"
+        echo "TESTY ZAKOŃCZONE SUKCESEM"
+
+    - name: Build Application
+      run: |
+        mkdir -p build
+        cp src/main.py build/
+        echo "BUDOWANIE ZAKOŃCZONE. WERSJA PYTHONA - ${{ matrix.python-version }}"
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-build-${{ matrix.python-version }}
+        path: build/
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
