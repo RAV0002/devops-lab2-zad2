@@ -48,12 +48,12 @@ jobs:
         name: app-build-${{ matrix.python-version }}
         path: build/
         
-    - name: Send notification on failure
+    - name: On failure send notification to discord
       if: failure()
       env:
         WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
       run: |
-        echo "ERROR - Użytkownik **${{ github.actor }}** zepsuł build na gałęzi **${{ github.ref_name }}"
+        curl -H "Content-Type: application/json" -d "{\"content\": \"ERROR - Użytkownik **${{ github.actor }}** zepsuł build na gałęzi **${{ github.ref_name }}**\"}" "$WEBHOOK_URL"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
