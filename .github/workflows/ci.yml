@@ -33,7 +33,7 @@ jobs:
 
     - name: Run Tests
       run: |
-        python -c "assert True"
+        python -c "assert False"
         echo "TESTY ZAKOŃCZONE SUKCESEM"
 
     - name: Build Application
@@ -47,7 +47,14 @@ jobs:
       with:
         name: app-build-${{ matrix.python-version }}
         path: build/
-
+        
+    - name: Send notification on failure
+      if: failure()
+      env:
+        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+      run: |
+        echo "ERROR - Użytkownik **${{ github.actor }}** zepsuł build na gałęzi **${{ github.ref_name }}"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+  
